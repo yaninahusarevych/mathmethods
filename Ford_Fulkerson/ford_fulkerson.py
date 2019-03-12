@@ -6,28 +6,34 @@ def fordfulkerson(graph, source, sink):
 	nodes = list(graph.nodes)
 	edges = dict(graph.edges)
 	dictofnodes = {i : 'unmarked' for i in nodes}
-	path, capacities = [], []
+	path, capacities = [source], []
 	maxflow, flow = 0, 0
 	source_node = source
 	zminna = 1
-	while dictofnodes[sink] != 'visited':
+	while dictofnodes[sink] != 'visited':	
 		dictofnodes[source_node] = 'visited'
-		path.append(source_node)
 		neighbours = list(graph.successors(source_node))
 		max_capacity = 0
 		for i in range(len(neighbours)):
-			dictofnodes[neighbours[i]] = 'marked and unvisited'
-			if dict(graph.get_edge_data(source_node, neighbours[i]))['capacity'] > max_capacity:
-				max_capacity = dict(graph.get_edge_data(source_node, neighbours[i]))['capacity']
-				path.append(neighbours[i])
+			if dictofnodes[neighbours[i]] != 'visited':
+				if dict(graph.get_edge_data(source_node, neighbours[i]))['capacity'] > max_capacity:
+					max_capacity = dict(graph.get_edge_data(source_node, neighbours[i]))['capacity']
+					path.append(neighbours[i])
+					dictofnodes[neighbours[i]] = 'marked and unvisited'
 		if max_capacity <= 0:
-			print("Stop, maximal flow is reached")
-			dictofnodes[sink] = 'visited'
-			break
-		capacities.append(max_capacity)
-		del path[zminna:len(path)-1]
-		source_node = path[-1]
-		zminna = zminna + 1
+			dictofnodes[path[-1]] = 'visited' 
+			del path[-1]
+			if len(path) != 0:
+				source_node = path[-1]
+			else:
+				print("Stop, maximal flow is reached")
+				break
+			continue
+		else:
+			capacities.append(max_capacity)
+			del path[zminna:len(path)-1]
+			source_node = path[-1]
+			zminna = zminna + 1
 		if source_node == sink:
 			maxflow = maxflow + min(capacities)
 			flow = min(capacities)
@@ -37,31 +43,36 @@ def fordfulkerson(graph, source, sink):
 			results(graph, path, maxflow, flow)
 			draw_graph()
 			capacities.clear()
-			path.clear()
+			path = [source]
 			source_node = source
 			zminna = 1
 			dictofnodes = {i : 'unmarked' for i in nodes}
 	
 
 G = nx.DiGraph()
-G.add_nodes_from('ABCDEFGH')
+G.add_nodes_from('123456789')
 G.add_edges_from([
-    ('A', 'B', {'capacity': 4, 'flow': 0}),
-    ('A', 'C', {'capacity': 5, 'flow': 0}),
-    ('A', 'D', {'capacity': 7, 'flow': 0}),
-    ('B', 'E', {'capacity': 7, 'flow': 0}),
-    ('C', 'E', {'capacity': 6, 'flow': 0}),
-    ('C', 'F', {'capacity': 4, 'flow': 0}),
-    ('C', 'G', {'capacity': 1, 'flow': 0}),
-    ('D', 'F', {'capacity': 8, 'flow': 0}),
-    ('D', 'G', {'capacity': 1, 'flow': 0}),
-    ('E', 'H', {'capacity': 7, 'flow': 0}),
-    ('F', 'H', {'capacity': 6, 'flow': 0}),
-    ('G', 'H', {'capacity': 4, 'flow': 0}),
+    ('1', '2', {'capacity': 8, 'flow': 0}),
+    ('1', '3', {'capacity': 5, 'flow': 0}),
+    ('1', '4', {'capacity': 5, 'flow': 0}),
+    ('2', '3', {'capacity': 2, 'flow': 0}),
+    ('2', '5', {'capacity': 12, 'flow': 0}),
+    ('3', '6', {'capacity': 8, 'flow': 0}),
+    ('4', '5', {'capacity': 4, 'flow': 0}),
+    ('4', '8', {'capacity': 6, 'flow': 0}),
+    ('4', '9', {'capacity': 10, 'flow': 0}),
+    ('5', '7', {'capacity': 3, 'flow': 0}),
+    ('6', '1', {'capacity': 6, 'flow': 0}),
+    ('6', '9', {'capacity': 15, 'flow': 0}),
+    ('7', '8', {'capacity': 9, 'flow': 0}),
+    ('7', '6', {'capacity': 12, 'flow': 0}),
+    ('8', '9', {'capacity': 11, 'flow': 0}),
+    ('9', '6', {'capacity': 5, 'flow': 0}),
 ])
 layout = {
-    'A': [0, 1], 'B': [1, 2], 'C': [1, 1], 'D': [1, 0],
-    'E': [2, 2], 'F': [2, 1], 'G': [2, 0], 'H': [3, 1],
+    '1': [0, 1], '2': [1, 2], '3': [1, 1], '4': [1, 0],
+    '5': [2, 2], '6': [2, 1], '7': [2, 0], '8': [3, 1],
+    '9': [3, 3]
 }
 def draw_graph():
     plt.figure(figsize=(12, 4))
@@ -84,4 +95,4 @@ def draw_graph():
 def results(graph, path, current_flow, increased_flow):
 	print('flow increased by', increased_flow, 'at path', path,'; current flow', current_flow)
 
-fordfulkerson(G, 'A', 'H')
+fordfulkerson(G, '2', '9')
