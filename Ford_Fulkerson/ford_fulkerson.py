@@ -47,29 +47,34 @@ def dfs(graph, source, sink):
     return path, reserve
 
 G = nx.DiGraph()
-G.add_nodes_from('123456789')
+G.add_nodes_from('1234567890')
 G.add_edges_from([
-    ('1', '2', {'capacity': 8, 'flow': 0}),
-    ('1', '3', {'capacity': 5, 'flow': 0}),
-    ('1', '4', {'capacity': 5, 'flow': 0}),
-    ('2', '3', {'capacity': 2, 'flow': 0}),
+    ('1', '2', {'capacity': 22, 'flow': 0}),
+    ('1', '3', {'capacity': 18, 'flow': 0}),
+    ('1', '4', {'capacity': 25, 'flow': 0}),
+    ('2', '3', {'capacity': 5, 'flow': 0}),
     ('2', '5', {'capacity': 12, 'flow': 0}),
     ('3', '6', {'capacity': 8, 'flow': 0}),
-    ('4', '5', {'capacity': 4, 'flow': 0}),
+    ('4', '5', {'capacity': 6, 'flow': 0}),
     ('4', '8', {'capacity': 6, 'flow': 0}),
     ('4', '9', {'capacity': 10, 'flow': 0}),
-    ('5', '7', {'capacity': 3, 'flow': 0}),
+    ('5', '7', {'capacity': 13, 'flow': 0}),
     ('6', '1', {'capacity': 6, 'flow': 0}),
     ('6', '9', {'capacity': 15, 'flow': 0}),
     ('7', '8', {'capacity': 9, 'flow': 0}),
     ('7', '6', {'capacity': 12, 'flow': 0}),
     ('8', '9', {'capacity': 11, 'flow': 0}),
     ('9', '6', {'capacity': 5, 'flow': 0}),
+    ('4', '0', {'capacity': 20, 'flow': 0}),
+    ('6', '0', {'capacity': 11, 'flow': 0}),
+    ('7', '0', {'capacity': 8, 'flow': 0}),
+    ('9', '0', {'capacity': 10, 'flow': 0}),
+    ('2', '6', {'capacity': 15, 'flow': 0}),
 ])
 layout = {
-    '1': [0, 0], '2': [1, 2], '3': [1, -2], '4': [4, 0],
-    '5': [4, 2], '6': [5, -2], '7': [7, 2], '8': [9, 2],
-    '9': [9, 0]
+    '1': [0, 0], '2': [1, 3], '3': [1, -3], '4': [5, 0],
+    '5': [5, 3], '6': [6, -3], '7': [8, 3], '8': [10, 3],
+    '9': [10, 0], '0': [10, -3]
 }
 def draw_graph():
     plt.figure(figsize=(12, 4))
@@ -92,4 +97,4 @@ def draw_graph():
 def results(graph, path, current_flow, increased_flow):
 	print('flow increased by: ', increased_flow, 'at path: ', path,'; current maximal flow: ', current_flow)
 
-fordfulkerson(G, '2', '9')
+fordfulkerson(G, '1', '0')
