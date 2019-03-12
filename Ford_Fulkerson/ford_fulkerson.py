@@ -3,51 +3,48 @@ import networkx as nx
 
 
 def fordfulkerson(graph, source, sink):
-	nodes = list(graph.nodes)
-	edges = dict(graph.edges)
-	dictofnodes = {i : 'unmarked' for i in nodes}
-	path, capacities = [source], []
-	maxflow, flow = 0, 0
-	source_node = source
-	zminna = 1
-	while dictofnodes[sink] != 'visited':	
-		dictofnodes[source_node] = 'visited'
-		neighbours = list(graph.successors(source_node))
-		max_capacity = 0
-		for i in range(len(neighbours)):
-			if dictofnodes[neighbours[i]] != 'visited':
-				if dict(graph.get_edge_data(source_node, neighbours[i]))['capacity'] > max_capacity:
-					max_capacity = dict(graph.get_edge_data(source_node, neighbours[i]))['capacity']
-					path.append(neighbours[i])
-					dictofnodes[neighbours[i]] = 'marked and unvisited'
-		if max_capacity <= 0:
-			dictofnodes[path[-1]] = 'visited' 
-			del path[-1]
-			if len(path) != 0:
-				source_node = path[-1]
-			else:
-				print("Stop, maximal flow is reached")
-				break
-			continue
-		else:
-			capacities.append(max_capacity)
-			del path[zminna:len(path)-1]
-			source_node = path[-1]
-			zminna = zminna + 1
-		if source_node == sink:
-			maxflow = maxflow + min(capacities)
-			flow = min(capacities)
-			for i in range(0, len(path) - 1, 1):
-				edges[(path[i], path[i+1])]['capacity'] -= flow
-				edges[(path[i], path[i+1])]['flow'] += flow
-			results(graph, path, maxflow, flow)
-			draw_graph()
-			capacities.clear()
-			path = [source]
-			source_node = source
-			zminna = 1
-			dictofnodes = {i : 'unmarked' for i in nodes}
+    maxflow, path = 0, True
+    while path:
+        path, increased_flow = dfs(graph, source, sink)
+        maxflow += increased_flow
+        for v, u in zip(path, path[1:]):
+            if graph.has_edge(v, u):
+                graph[v][u]['flow'] += increased_flow
+            else:
+                graph[u][v]['flow'] -= increased_flow
+        results(graph, path, maxflow, increased_flow)
+        draw_graph()
 	
+
+def dfs(graph, source, sink):
+    undirected = graph.to_undirected()
+    explored = {source}
+    stack = [(source, 0, dict(undirected[source]))]
+    while stack:
+        v, zminna, neighbours = stack[-1]
+        if v == sink:
+            break
+        while neighbours:
+            u, e = neighbours.popitem()
+            if u not in explored:
+                break
+        else:
+            stack.pop()
+            continue
+        in_direction = graph.has_edge(v, u)
+        capacity = e['capacity']
+        flow = e['flow']
+        neighbours = dict(undirected[u])
+        if in_direction and flow < capacity:
+            stack.append((u, capacity - flow, neighbours))
+            explored.add(u)
+        elif not in_direction and flow:
+            stack.append((u, flow, neighbours))
+            explored.add(u)
+    reserve = min((f for zminna, f, zminna in stack[1:]), default=0)
+    path = [v for v, zminna,zminna in stack]
+    
+    return path, reserve
 
 G = nx.DiGraph()
 G.add_nodes_from('123456789')
@@ -70,21 +67,21 @@ G.add_edges_from([
     ('9', '6', {'capacity': 5, 'flow': 0}),
 ])
 layout = {
-    '1': [0, 1], '2': [1, 2], '3': [1, 1], '4': [1, 0],
-    '5': [2, 2], '6': [2, 1], '7': [2, 0], '8': [3, 1],
-    '9': [3, 3]
+    '1': [0, 0], '2': [1, 2], '3': [1, -2], '4': [4, 0],
+    '5': [4, 2], '6': [5, -2], '7': [7, 2], '8': [9, 2],
+    '9': [9, 0]
 }
 def draw_graph():
     plt.figure(figsize=(12, 4))
     plt.axis('off')
 
-    nx.draw_networkx_nodes(G, layout, node_color='green', node_size=600)
+    nx.draw_networkx_nodes(G, layout, node_color='firebrick', node_size=400)
     nx.draw_networkx_edges(G, layout, edge_color='gray')
     nx.draw_networkx_labels(G, layout, font_color='black')
 
     for u, v, e in G.edges(data=True):
         label = '{}/{}'.format(e['flow'], e['capacity'])
-        color = 'green' if e['flow'] < e['capacity'] else 'red'
+        color = 'black' if e['flow'] < e['capacity'] else 'red'
         x = layout[u][0] * .6 + layout[v][0] * .4
         y = layout[u][1] * .6 + layout[v][1] * .4
         t = plt.text(x, y, label, size=16, color=color, 
@@ -93,6 +90,6 @@ def draw_graph():
     plt.show()
 
 def results(graph, path, current_flow, increased_flow):
-	print('flow increased by', increased_flow, 'at path', path,'; current flow', current_flow)
+	print('flow increased by: ', increased_flow, 'at path: ', path,'; current maximal flow: ', current_flow)
 
 fordfulkerson(G, '2', '9')
