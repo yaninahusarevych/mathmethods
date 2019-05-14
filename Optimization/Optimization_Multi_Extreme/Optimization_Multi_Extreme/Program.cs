@@ -17,7 +17,20 @@ namespace Optimization_Multi_Extreme
             this.x = x;
             this.y = y;
         }
-     
+
+        public void GetRestrictions(ref double[] restrictions)
+        {
+            restrictions = new double[] { Math.Pow(y - 5 * x, 2), Math.Pow(y + 0.01 * Math.Pow(x - 20, 2) - 37, 2), Math.Pow(x - 40, 2),
+                Math.Pow(1 - x, 2), Math.Pow(y - 40, 2), Math.Pow(1 - y, 2)};
+            for (int i = 0; i < restrictions.Length; i++)
+            {
+                if (restrictions[i] > 0)
+                {
+                    restrictions[i] = 0;
+                }
+            }
+        }
+ 
         public double GetFunctionValue()
         {
             return Math.Cos(0.3 * x) * Math.Cos(0.25 * y - 7) - (1 / x);
@@ -39,26 +52,79 @@ namespace Optimization_Multi_Extreme
             return sum;
         }
 
-        public double GetBarrierFunction(double function_value, double x, double y, int iteration_number)
+        public double GetBarrierFunction(int parametre)
         {
-            double parametre = Math.Pow(2, iteration_number - 1);
-            double restrinction_1 = Math.Pow(y - 5 * x, 2);
-            double restrinction_2 = Math.Pow(y + 0.01 * Math.Pow(x - 20, 2) - 37, 2);
-            double restrinction_3 = Math.Pow(x - 40, 2);
-            double restrinction_4 = Math.Pow(1 - x, 2);
-            double restrinction_5 = Math.Pow(y - 40, 2);
-            double restrinction_6 = Math.Pow(1 - y, 2);
-            double barrier_function = restrinction_1 + restrinction_2 + restrinction_3 + restrinction_4 + restrinction_5 + restrinction_6;
+            double[] restrictions = new double[6];
+            GetRestrictions(ref restrictions);
+            double function_value = Math.Cos(0.3 * x) * Math.Cos(0.25 * y - 7) - (1 / x);
+            double barrier_function = 0;
+            for (int i = 0; i < restrictions.Length; i++)
+            {
+                barrier_function += restrictions[i];
+            }
             return function_value + parametre * barrier_function;
+        }
+
+        public double GetBarrierDerivativeX(int parametre)
+        {
+            double[] restrictions = new double[6];
+            GetRestrictions(ref restrictions);
+            double[] restrictions_derivitaves = new double[] { -10 * (y - 5 * x), 0.04 * (x - 20) * (y + 0.01 * Math.Pow(x - 20, 2) - 37),
+                2 * (x - 40), -2 * (1 - x) };
+            for (int i = 0; i < restrictions_derivitaves.Length; i++)
+            {
+                if(restrictions[i] == 0)
+                {
+                    restrictions_derivitaves[i] = 0;
+                }
+            }
+            double barrier_derivatives_x = 0;
+            for (int i = 0; i < restrictions_derivitaves.Length; i++)
+            {
+                barrier_derivatives_x += restrictions_derivitaves[i];
+            }
+            double function_derivative_x = -0.3 * Math.Sin(0.3 * x) * Math.Cos(0.25 * y - 7) - (1 / Math.Pow(x, 2));
+            return function_derivative_x + parametre * barrier_derivatives_x;
+        }
+        
+        public double GetBarrierDerivativeY(int parametre)
+        {
+            double[] restrictions = new double[6];
+            GetRestrictions(ref restrictions);
+            double[] restrictions_derivitaves = new double[] { 2 * (y - 5 * x), 2 * (y + 0.01 * Math.Pow(x - 20, 2) - 37), 2 * (y - 40), -2 * (1 - y) };
+            for (int i = 0; i < restrictions_derivitaves.Length; i++)
+            {
+                if (i == 2 || i == 3)
+                {
+                    if(restrictions[i+2] == 0)
+                    {
+                        restrictions_derivitaves[i] = 0;
+                    }
+                }
+                else
+                {
+                    if (restrictions[i] == 0)
+                    {
+                        restrictions_derivitaves[i] = 0;
+                    }
+                }
+            }
+            double barrier_derivatives_y = 0;
+            for (int i = 0; i < restrictions_derivitaves.Length; i++)
+            {
+                barrier_derivatives_y += restrictions_derivitaves[i];
+            }
+            double function_derivative_y = -0.25 * Math.Sin(0.25 * y - 7) * Math.Cos(0.3 * x);
+            return function_derivative_y + parametre * barrier_derivatives_y;
         }
 }
 
     class Program
     {
-        public void GradientDescent(double epsylon, ref double x_start, ref double y_start)
+        public static void GradientDescent(double epsylon, ref double x_start, ref double y_start, int parametre)
         {
             int iteration_descent = 0;
-            double lambda = 0.01;
+            double lambda = 10;
             double[] x_old = new double[2];
             double[] x_new = new double[2];
             while (true)
@@ -69,7 +135,7 @@ namespace Optimization_Multi_Extreme
                     x_old[1] = y_start;
                 }
                 Function function = new Function(x_old[0], x_old[1]);
-                double[] gradient = new double[] { function.GetDerivativeX(), function.GetDerivativeY() };
+                double[] gradient = new double[] { function.GetBarrierDerivativeX(parametre), function.GetBarrierDerivativeY(parametre) };
                 double gradient_abs = function.GetGradientAbs(gradient);
                 if (gradient_abs < epsylon)
                 {
@@ -87,6 +153,7 @@ namespace Optimization_Multi_Extreme
             }
             x_start = x_new[0];
             y_start = x_new[1];
+            Console.WriteLine("Iterations =  " + iteration_descent);
         }
 
 
@@ -96,7 +163,16 @@ namespace Optimization_Multi_Extreme
             double epsylon = Convert.ToDouble(Console.ReadLine());
             Random random = new Random();
             Function minimization = new Function(1, 1);
-            
+            int parametre = 0;
+            for (int i = 1; i <= 10; i++)
+            {
+                parametre = Convert.ToInt32(Math.Pow(2, i - 1));
+                Console.WriteLine("Value before = " + minimization.GetBarrierFunction(i));
+                GradientDescent(epsylon, ref minimization.x, ref minimization.y, i);
+                Console.WriteLine("Value after = " + minimization.GetBarrierFunction(i));
+                Console.WriteLine("X = " + minimization.x);
+                Console.WriteLine("Y = " + minimization.y);
+            }
         }
     }
 }
