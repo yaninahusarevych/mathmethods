@@ -38,7 +38,20 @@ namespace Optimization_Multi_Extreme
             double sum = Math.Sqrt(Math.Pow(gradient_array[0], 2) + Math.Pow(gradient_array[1], 2));
             return sum;
         }
-    }
+
+        public double GetBarrierFunction(double function_value, double x, double y, int iteration_number)
+        {
+            double parametre = Math.Pow(2, iteration_number - 1);
+            double restrinction_1 = Math.Pow(y - 5 * x, 2);
+            double restrinction_2 = Math.Pow(y + 0.01 * Math.Pow(x - 20, 2) - 37, 2);
+            double restrinction_3 = Math.Pow(x - 40, 2);
+            double restrinction_4 = Math.Pow(1 - x, 2);
+            double restrinction_5 = Math.Pow(y - 40, 2);
+            double restrinction_6 = Math.Pow(1 - y, 2);
+            double barrier_function = restrinction_1 + restrinction_2 + restrinction_3 + restrinction_4 + restrinction_5 + restrinction_6;
+            return function_value + parametre * barrier_function;
+        }
+}
 
     class Program
     {
