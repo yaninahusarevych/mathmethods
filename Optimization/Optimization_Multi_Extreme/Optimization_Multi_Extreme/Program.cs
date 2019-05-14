@@ -109,7 +109,7 @@ namespace Optimization_Multi_Extreme
         public void FindLocalMinimum(double epsylon, ref double x_start, ref double y_start, int parametre)
         {
             int iteration_descent = 0;
-            double lambda = 7;
+            double lambda = 5;
             double[] x_old = new double[2];
             double[] x_new = new double[2];
             while (true)
@@ -136,8 +136,11 @@ namespace Optimization_Multi_Extreme
                 }
                 iteration_descent++;
             }
-            x_start = x_new[0];
-            y_start = x_new[1];
+            if (iteration_descent != 0)
+            {
+                x_start = x_new[0];
+                y_start = x_new[1];
+            }
             Console.WriteLine("Iterations =  " + iteration_descent);
         }
     }
@@ -150,17 +153,17 @@ namespace Optimization_Multi_Extreme
             Console.Write("Epsylon for gradient descent: ");
             double epsylon = Convert.ToDouble(Console.ReadLine());
             Random random = new Random();
-            Function minimization = new Function(1, 1);
+            Function minimization = new Function(4, 4);
             GradientDescent gradientDescent = new GradientDescent();
-            int parametre = 0;
-            for (int i = 1; i <= 10; i++)
+            int parametre = 1;
+            while (parametre > epsylon)
             {
-                parametre = Convert.ToInt32(Math.Pow(2, i - 1));
                 Console.WriteLine("Value before = " + minimization.GetBarrierFunction(parametre));
                 gradientDescent.FindLocalMinimum(epsylon, ref minimization.x, ref minimization.y, parametre);
                 Console.WriteLine("Value after = " + minimization.GetBarrierFunction(parametre));
                 Console.WriteLine("X = " + minimization.x);
                 Console.WriteLine("Y = " + minimization.y);
+                parametre /= 10;
             }
         }
     }
