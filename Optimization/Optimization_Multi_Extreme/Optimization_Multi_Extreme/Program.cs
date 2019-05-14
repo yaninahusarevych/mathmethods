@@ -55,12 +55,48 @@ namespace Optimization_Multi_Extreme
 
     class Program
     {
+        public void GradientDescent(double epsylon, ref double x_start, ref double y_start)
+        {
+            int iteration_descent = 0;
+            double lambda = 0.01;
+            double[] x_old = new double[2];
+            double[] x_new = new double[2];
+            while (true)
+            {
+                if (iteration_descent == 0)
+                {
+                    x_old[0] = x_start;
+                    x_old[1] = y_start;
+                }
+                Function function = new Function(x_old[0], x_old[1]);
+                double[] gradient = new double[] { function.GetDerivativeX(), function.GetDerivativeY() };
+                double gradient_abs = function.GetGradientAbs(gradient);
+                if (gradient_abs < epsylon)
+                {
+                    break;
+                }
+                for(int i = 0; i < 2; i++)
+                {
+                    x_new[i] = x_old[i] - lambda * gradient[i];
+                }
+                for (int i = 0; i < 2; i++)
+                {
+                    x_old[i] = x_new[i];
+                }
+                iteration_descent++;
+            }
+            x_start = x_new[0];
+            y_start = x_new[1];
+        }
+
+
         static void Main(string[] args)
         {
+            Console.Write("Epsylon for gradient descent: ");
+            double epsylon = Convert.ToDouble(Console.ReadLine());
             Random random = new Random();
             Function minimization = new Function(1, 1);
-            double[] gradient = new double[] {minimization.GetDerivativeX(), minimization.GetDerivativeY()};
-            double gradient_abs = minimization.GetGradientAbs(gradient);
+            
         }
     }
 }
