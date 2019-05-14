@@ -30,21 +30,6 @@ namespace Optimization_Multi_Extreme
                 }
             }
         }
- 
-        public double GetFunctionValue()
-        {
-            return Math.Cos(0.3 * x) * Math.Cos(0.25 * y - 7) - (1 / x);
-        }
-
-        public double GetDerivativeX()
-        {
-            return -0.3 * Math.Sin(0.3 * x) * Math.Cos(0.25 * y - 7) - (1 / Math.Pow(x, 2));
-        }
-
-        public double GetDerivativeY()
-        {
-            return -0.25 * Math.Sin(0.25 * y - 7) * Math.Cos(0.3 * x);
-        }
 
         public double GetGradientAbs(double[] gradient_array)
         {
@@ -117,14 +102,14 @@ namespace Optimization_Multi_Extreme
             double function_derivative_y = -0.25 * Math.Sin(0.25 * y - 7) * Math.Cos(0.3 * x);
             return function_derivative_y + parametre * barrier_derivatives_y;
         }
-}
+    }
 
-    class Program
+    public class GradientDescent
     {
-        public static void GradientDescent(double epsylon, ref double x_start, ref double y_start, int parametre)
+        public void FindLocalMinimum(double epsylon, ref double x_start, ref double y_start, int parametre)
         {
             int iteration_descent = 0;
-            double lambda = 10;
+            double lambda = 7;
             double[] x_old = new double[2];
             double[] x_new = new double[2];
             while (true)
@@ -141,7 +126,7 @@ namespace Optimization_Multi_Extreme
                 {
                     break;
                 }
-                for(int i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     x_new[i] = x_old[i] - lambda * gradient[i];
                 }
@@ -155,21 +140,25 @@ namespace Optimization_Multi_Extreme
             y_start = x_new[1];
             Console.WriteLine("Iterations =  " + iteration_descent);
         }
+    }
 
 
+    class Program
+    {
         static void Main(string[] args)
         {
             Console.Write("Epsylon for gradient descent: ");
             double epsylon = Convert.ToDouble(Console.ReadLine());
             Random random = new Random();
             Function minimization = new Function(1, 1);
+            GradientDescent gradientDescent = new GradientDescent();
             int parametre = 0;
             for (int i = 1; i <= 10; i++)
             {
                 parametre = Convert.ToInt32(Math.Pow(2, i - 1));
-                Console.WriteLine("Value before = " + minimization.GetBarrierFunction(i));
-                GradientDescent(epsylon, ref minimization.x, ref minimization.y, i);
-                Console.WriteLine("Value after = " + minimization.GetBarrierFunction(i));
+                Console.WriteLine("Value before = " + minimization.GetBarrierFunction(parametre));
+                gradientDescent.FindLocalMinimum(epsylon, ref minimization.x, ref minimization.y, parametre);
+                Console.WriteLine("Value after = " + minimization.GetBarrierFunction(parametre));
                 Console.WriteLine("X = " + minimization.x);
                 Console.WriteLine("Y = " + minimization.y);
             }
