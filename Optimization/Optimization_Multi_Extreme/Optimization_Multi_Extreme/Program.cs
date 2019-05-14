@@ -32,6 +32,12 @@ namespace Optimization_Multi_Extreme
         {
             return -0.25 * Math.Sin(0.25 * y - 7) * Math.Cos(0.3 * x);
         }
+
+        public double GetGradientAbs(double[] gradient_array)
+        {
+            double sum = Math.Sqrt(Math.Pow(gradient_array[0], 2) + Math.Pow(gradient_array[1], 2));
+            return sum;
+        }
     }
 
     class Program
@@ -41,6 +47,7 @@ namespace Optimization_Multi_Extreme
             Random random = new Random();
             Function minimization = new Function(1, 1);
             double[] gradient = new double[] {minimization.GetDerivativeX(), minimization.GetDerivativeY()};
+            double gradient_abs = minimization.GetGradientAbs(gradient);
         }
     }
 }
