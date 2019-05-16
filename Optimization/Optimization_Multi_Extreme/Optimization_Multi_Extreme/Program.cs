@@ -153,16 +153,14 @@ namespace Optimization_Multi_Extreme
             Console.Write("Epsylon for gradient descent: ");
             double epsylon = Convert.ToDouble(Console.ReadLine());
             Random random = new Random();
-            Function minimization = new Function(4, 4);
-            GradientDescent gradientDescent = new GradientDescent();
+            Function minimization = new Function(15, 18);
             int parametre = 1;
+            Console.WriteLine("Value in start point = " + minimization.GetBarrierFunction(parametre));
+            GradientDescent gradientDescent = new GradientDescent();            
             while (parametre > epsylon)
             {
-                Console.WriteLine("Value before = " + minimization.GetBarrierFunction(parametre));
                 gradientDescent.FindLocalMinimum(epsylon, ref minimization.x, ref minimization.y, parametre);
-                Console.WriteLine("Value after = " + minimization.GetBarrierFunction(parametre));
-                Console.WriteLine("X = " + minimization.x);
-                Console.WriteLine("Y = " + minimization.y);
+                Console.WriteLine("Value in point with x: " + minimization.x + ", y: " + minimization.y + " = " + minimization.GetBarrierFunction(parametre));
                 parametre /= 10;
             }
         }
